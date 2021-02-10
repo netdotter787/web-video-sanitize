@@ -29,12 +29,12 @@ function parseURL(url) {
 
 function init()
 {
-    if(window.location.host === 'www.youtube.com') {
-        parsedUrl = parseURL(window.location.href);
-        if(parsedUrl.searchObject.hasOwnProperty('v') && document.getElementById('player-container')) {
-            cleanUp();
-        }
+
+    if(document.getElementById('player-container')) {
+        cleanUp();
     }
+    window.requestAnimationFrame(init);
+
 }
 
 function getSelector(selector)
@@ -44,7 +44,7 @@ function getSelector(selector)
 
 function cleanUp()
 {
-    var ytPlayer = {
+    let ytPlayer = {
         adsCountSelector: getSelector(ADS_OF_COUNT),
         adsOverlay: getSelector(ADS_OVERLAY),
         brandingOverlay: getSelector(BRANDING_OVERLAY),
@@ -72,6 +72,5 @@ function cleanUp()
     }
 }
 
-setInterval(function() {
-    init();
-}, 1000);
+
+window.requestAnimationFrame(init);
