@@ -2,6 +2,7 @@ const ADS_OF_COUNT = '.ytp-ad-player-overlay-instream-info';
 const ADS_OVERLAY = '.ytp-ad-overlay-container';
 const BRANDING_OVERLAY = '.branding-img-container';
 const ADS_SKIP_BTN = 'button.ytp-ad-skip-button.ytp-button';
+const CLOSING_ELEMENTS = '.ytp-ce-element';
 
 function parseURL(url) {
     var parser = document.createElement('a'),
@@ -42,13 +43,19 @@ function getSelector(selector)
     return document.querySelector(selector);
 }
 
+function getAllFromSelector(selector)
+{
+	return document.querySelectorAll(selector);
+}
+
 function cleanUp()
 {
     let ytPlayer = {
         adsCountSelector: getSelector(ADS_OF_COUNT),
         adsOverlay: getSelector(ADS_OVERLAY),
         brandingOverlay: getSelector(BRANDING_OVERLAY),
-        adsSkipBtn: getSelector(ADS_SKIP_BTN)
+        adsSkipBtn: getSelector(ADS_SKIP_BTN),
+        closingElements: getAllFromSelector(CLOSING_ELEMENTS)
     };
 
     if(ytPlayer.adsCountSelector) {
@@ -70,6 +77,18 @@ function cleanUp()
         console.log("To be skipped");
         ytPlayer.adsSkipBtn.click();
     }
+
+    if(ytPlayer.closingElements && ytPlayer.closingElements.length > 0) {
+    	console.log("Remove closing element");
+    	removeElements(ytPlayer.closingElements);
+    }
+}
+
+function removeElements(elements)
+{
+	elements.forEach(function(item, index) { 
+		item.remove();
+	});
 }
 
 
