@@ -1,61 +1,41 @@
-const ADS_OF_COUNT = '.ytp-ad-player-overlay-instream-info';
-const ADS_OVERLAY = '.ytp-ad-overlay-container';
-const BRANDING_OVERLAY = '.branding-img-container';
-const ADS_SKIP_BTN = 'button.ytp-ad-skip-button.ytp-button';
-const CLOSING_ELEMENTS = '.ytp-ce-element';
-
-function parseURL(url) {
-    var parser = document.createElement('a'),
-        searchObject = {},
-        queries, split, i;
-    // Let the browser do the work
-    parser.href = url;
-    // Convert query string to object
-    queries = parser.search.replace(/^\?/, '').split('&');
-    for( i = 0; i < queries.length; i++ ) {
-        split = queries[i].split('=');
-        searchObject[split[0]] = split[1];
-    }
-    return {
-        protocol: parser.protocol,
-        host: parser.host,
-        hostname: parser.hostname,
-        port: parser.port,
-        pathname: parser.pathname,
-        search: parser.search,
-        searchObject: searchObject,
-        hash: parser.hash
-    };
+const SETTINGS = {};
+const ELEMENT_CONFIG = {
+    adsOfCount: '.ytp-ad-player-overlay-instream-info',
+    adsOverlay: '.ytp-ad-overlay-container',
+    brandingOverlay: '.branding-img-container',
+    adsSkipBtn: 'button.ytp-ad-skip-button.ytp-button',
+    closingElements: '.ytp-ce-element'
 }
 
 function init()
 {
-
-    if(document.getElementById('player-container')) {
+    if(document.getElementById('player-container'))
         cleanUp();
-    }
+
     window.requestAnimationFrame(init);
 
 }
 
-function getSelector(selector)
-{
-    return document.querySelector(selector);
-}
+function getSelector(selector) { return document.querySelector(selector); }
 
-function getAllFromSelector(selector)
-{
-	return document.querySelectorAll(selector);
-}
+function getAllFromSelector(selector) { return document.querySelectorAll(selector); }
 
 function cleanUp()
 {
+    chrome.storage.local.get(["settings"], function(items) {
+        if('settings' in items) {
+            for(let config in items.settings) {
+                SETTINGS[config] = items.settings[config];
+            }
+        }
+    });
+
     let ytPlayer = {
-        adsCountSelector: getSelector(ADS_OF_COUNT),
-        adsOverlay: getSelector(ADS_OVERLAY),
-        brandingOverlay: getSelector(BRANDING_OVERLAY),
-        adsSkipBtn: getSelector(ADS_SKIP_BTN),
-        closingElements: getAllFromSelector(CLOSING_ELEMENTS)
+        adsCountSelector: getSelector(ELEMENT_CONFIG.adsOfCount),
+        adsOverlay: getSelector(ELEMENT_CONFIG.adsOverlay),
+        brandingOverlay: getSelector(ELEMENT_CONFIG.brandingOverlay),
+        adsSkipBtn: getSelector(ELEMENT_CONFIG.adsSkipBtn),
+        closingElements: getAllFromSelector(ELEMENT_CONFIG.closingElements)
     };
 
     if(ytPlayer.adsCountSelector) {
@@ -63,22 +43,22 @@ function cleanUp()
         ytPlayer.adsCountSelector.remove();
     }
 
-    if(ytPlayer.adsOverlay) {
+    if(isEnabled('hide_overlay_ads') && ytPlayer.adsOverlay) {
         console.log("Cleaning ads");
         ytPlayer.adsOverlay.remove();
     }
 
-    if(ytPlayer.brandingOverlay) {
+    if(isEnabled('hide_branding_overlay') && ytPlayer.brandingOverlay) {
         console.log("Cleaning Branding");
         ytPlayer.brandingOverlay.remove();
     }
 
-    if(ytPlayer.adsSkipBtn) {
+    if(isEnabled('auto_skip_adds') && ytPlayer.adsSkipBtn) {
         console.log("To be skipped");
         ytPlayer.adsSkipBtn.click();
     }
 
-    if(ytPlayer.closingElements && ytPlayer.closingElements.length > 0) {
+    if(isEnabled('hide_closing_elements') && ytPlayer.closingElements && ytPlayer.closingElements.length > 0) {
     	console.log("Remove closing element");
     	removeElements(ytPlayer.closingElements);
     }
@@ -89,6 +69,11 @@ function removeElements(elements)
 	elements.forEach(function(item, index) { 
 		item.remove();
 	});
+}
+
+function isEnabled(property)
+{
+    return SETTINGS[property] === 1 ? true : false;
 }
 
 
